@@ -1,0 +1,6 @@
+*.log
+*.dll
+.vscode/
+main.code-workspace
+Makefile
+*.exe
