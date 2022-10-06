@@ -6,15 +6,18 @@ Game Title: Naughty List
 
 Brief Overview:
 
-The end user plays as a rogue variant of Santa "Bad Santa" and must deliver coal to as many houses as possible before the timer runs out. 
+Endless Runner.
 
-The challeneges the player faces:
-- Obstacles (buildings, walls, slippery surface - snow, etc)
-- Varying heights
-- Timed delivery (this is to deliver as much coal as possible before "Good Santa" gets there)
-- 3 lives
+The user plays as an alternative variant of Santa "Bad Santa" and must tally as much points as possible before the timer runs out or player dies. 
 
-Bonus features:
+Challenges the player faces:
+- Obstacles (snowman, cliff,  etc)
+- Timed
+- 3 lives (can be increased by 1 life by collecting Christmas cake)
+
+Features:
 - Character level up (increased speed, jump height) / (pickup some of "Good Santa's presents")
 - Time extension / given at checkpoints
-- Christmas Cake / health boost
+- Christmas Cake / extra life
+- Christmas presents allow the character to take reduced / no damage for a period of time
+- High Score
