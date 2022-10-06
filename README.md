@@ -16,8 +16,7 @@ Challenges the player faces:
 - 3 lives (can be increased by 1 life by collecting Christmas cake)
 
 Features:
-- Character level up (increased speed, jump height) / (pickup some of "Good Santa's presents")
-- Time extension / given at checkpoints
-- Christmas Cake / extra life
+- Character level up (increased speed, jump height, time extension) - given at timed checkpoints
+- Christmas Cake - extra life
 - Christmas presents allow the character to take reduced / no damage for a period of time
 - High Score
