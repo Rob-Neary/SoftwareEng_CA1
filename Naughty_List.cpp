@@ -1,4 +1,6 @@
 // Include external development libraries for use of specific assets, shapes, textures, models, shaders, audio and functions
+//#define RAYGUI_IMPLEMENTATION // required for Raygui library
+//#include <raygui.h>  // Raygui library
 #include <cstdio>    // cstdio library
 #include "raylib.h"  // Raylib library
 #include "raymath.h" // Raymath library
@@ -7,14 +9,13 @@
 // Define Types
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+using namespace std;
+
 enum Animations
 {
     Idle,
-    //   Walk,
     Run,
-    Jump,
-    //   Slide,
-    //   Die
+    Jump
 };
 
 enum JumpDirection
@@ -58,17 +59,17 @@ int main()
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     bool pause = true;
 
-    Texture2D xmasPresent[2]; //{LoadTexture("resources/image_tiles/xmas_present.png"), LoadTexture("resources/image_tiles/xmas_present2.png")};
-    Rectangle xPSourceRect[2];
-    Rectangle xPDestRect[2];
+    Texture2D xmasPresent[2]{}; //{LoadTexture("resources/sprites/xmas_present.png"), LoadTexture("resources/sprites/xmas_present2.png")};
+    Rectangle xPSourceRect[2]{};
+    Rectangle xPDestRect[2]{};
 
-    xmasPresent[0] = LoadTexture("resources/image_tiles/xmas_present1.png");
-    xmasPresent[1] = LoadTexture("resources/image_tiles/xmas_present2.png");
-    Vector2 xPOrigin[2];
+    xmasPresent[0] = LoadTexture("resources/sprites/xmas_present1.png");
+    xmasPresent[1] = LoadTexture("resources/sprites/xmas_present2.png");
+    Vector2 xPOrigin[2]{};
 
     float const xpScale = 0.015; // 10%
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 2; i++) // initialise variable i to 0 (initialised only once); boolean(test) expression, if i is less than 2 execute code within for loop; update i by 1 and re-execute test expression until condition is met
     {
         xPSourceRect[i].x = 0;
         xPSourceRect[i].y = 0;
@@ -80,14 +81,15 @@ int main()
         xPDestRect[i].x = 0;
         xPDestRect[i].y = 0;
 
-        xPOrigin[i].x = xmasPresent[i].width / 2 * xpScale;
-        xPOrigin[i].y = xmasPresent[i].height / 2 * xpScale;
+        xPOrigin[i].x = (float)xmasPresent[i].width / 2 * xpScale;
+        xPOrigin[i].y = (float)xmasPresent[i].height / 2 * xpScale;
+        std::cout << "testing value of i - for i < 2, i should return twice\n"; // debugging test expression
     }
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Load Textures
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    Texture2D bg_image = LoadTexture("resources/image_tiles/bg_image1.png");
+    Texture2D bg_image = LoadTexture("resources/images/bg_image1.png");
 
     Rectangle bg_SourceRec = {};
     Rectangle bg_DestRec = {};
@@ -102,16 +104,16 @@ int main()
     bg_DestRec.width = screenWidth;
     bg_DestRec.height = screenHeight;
 
-    Texture2D santa_Idle = LoadTexture("resources/idle_spritesheet.png");
-    Texture2D santa_Run = LoadTexture("resources/run_spritesheet.png");
-    Texture2D santa_Jump = LoadTexture("resources/jump_spritesheet.png");
+    Texture2D santa_Idle = LoadTexture("resources/sprites/idle_spritesheet_single.png");
+    Texture2D santa_Run = LoadTexture("resources/sprites/run_spritesheet.png");
+    Texture2D santa_Jump = LoadTexture("resources/sprites/jump_spritesheet_single.png");
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    int numFramesIdle = 16;
+    int numFramesIdle = 1;
     int numFramesRun = 11;
-    int numFramesJump = 16;
+    int numFramesJump = 1;
 
     float idle_FrameWidth = (float)(santa_Idle.width / numFramesIdle);
     float run_FrameWidth = (float)(santa_Run.width / numFramesRun);
@@ -125,16 +127,12 @@ int main()
     float frameCounter = 0.f;
     float frameTime = 1.f / 15.f;
     float deltaTime = 0.f; // initialise as 0 here, get current time at beginning of loop
-    // float direction = 1.f;
     float const ground = 560.f;
-    float const jumpSpeedUp = 500.f;
-    float const jumpSpeedDown = 250.f;
-    float maxJumpHeight = 350.f;
+    float const jumpSpeedUp = 800.f;
+    float const jumpSpeedDown = 500.f;
+    float maxJumpHeight = 330.f;
     float scrollSpeed = 700.f;
     JumpDirection jumpdirection;
-
-    // float gravity = 9.81.f;
-    // float velocity = 10.f;
 
     Rectangle idle_DestRec = {screenWidth / 2.f, screenHeight / 2.f, idle_FrameWidth, idle_FrameHeight};
     Rectangle run_DestRec = {screenWidth / 2.f, screenHeight / 2.f, run_FrameWidth, run_FrameHeight};
@@ -143,6 +141,8 @@ int main()
     Rectangle objectRectIdle{};
     Rectangle objectRectRun{};
     Rectangle objectRectJump{};
+
+    Rectangle tmpRect;
 
     objectRectIdle.width = idle_FrameWidth;
     objectRectIdle.height = idle_FrameHeight;
@@ -156,6 +156,7 @@ int main()
     Vector2 santa_IdleCentre = {(idle_FrameWidth / 2), (idle_FrameHeight / 2)};
     Vector2 santa_RunCentre = {(run_FrameWidth / 2), (run_FrameHeight / 2)};
     Vector2 santa_JumpCentre = {(jump_FrameWidth / 2), (jump_FrameHeight / 2)};
+
     SetTargetFPS(144); // Set the target frames per second to 144FPS
     //-----------------------------------------------------------------------------------------------------------------------
 
@@ -226,7 +227,7 @@ int main()
         }
 
         //-------------------------------------------------------------------------------------------------------------------
-        // Logic (compute movement)
+        // Game Logic (compute movement)
         //-------------------------------------------------------------------------------------------------------------------
 
         // background image scroll
@@ -237,19 +238,27 @@ int main()
             bg_SourceRec.x = 0;
 
         // scrolling of the xmas presents
-        for (int i = 0; i < 2; i++)
+        if (!pause)
         {
-            if (xPDestRect[i].x < GetRandomValue(-500, -200)) // min / max
+            for (int i = 0; i < 2; i++)
             {
-                xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
                 xPDestRect[i].y = ground;
-            }
-            else
-                xPDestRect[i].x -= scrollSpeed * deltaTime;
+                if (xPDestRect[i].x < GetRandomValue(-500, -200)) // min / max
+                {
+                    xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
+                }
+                else
+                    xPDestRect[i].x -= scrollSpeed * deltaTime;
 
-            if (CheckCollisionCircles(santa_RunCentre, run_DestRec.width / 4, xPOrigin[i], xPDestRect[i].width / 2))
-            {
-                xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
+                if (animations != Jump)
+                    tmpRect = run_DestRec;
+                else
+                    tmpRect = jump_DestRec;
+                if (CheckCollisionCircles(Vector2{tmpRect.x, tmpRect.y}, tmpRect.width / 4,
+                                          Vector2{xPDestRect[i].x + xPDestRect[i].width / 2, xPDestRect[i].y + xPDestRect[i].height / 2}, xPDestRect[i].width / 2))
+                {
+                    xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
+                }
             }
         }
 
@@ -344,8 +353,14 @@ int main()
         // Draw background image
         DrawTexturePro(bg_image, bg_SourceRec, bg_DestRec, Vector2Zero(), 0, WHITE);
 
+        DrawFPS(10, 10);
+
         // Draw Xmas presents
-        DrawTexturePro(xmasPresent[0], xPSourceRect[0], xPDestRect[0], Vector2Zero(), 0, WHITE);
+        if (!pause)
+        {
+            for (int i = 0; i < 2; i++)
+                DrawTexturePro(xmasPresent[i], xPSourceRect[i], xPDestRect[i], Vector2Zero(), 0, WHITE);
+        }
 
         const char *msg = {"Naughty List"};
         const char *msg2 = {"by Rob N"};
@@ -377,8 +392,8 @@ int main()
             break;
         }
 
-        DrawTextEx(SnowforSanta, msg, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight}, 38, 5, GetColor(0x052c46ff));
-        DrawTextEx(coolvetica_rg, msg2, (Vector2){screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 30}, 22, 2, WHITE);
+        DrawTextEx(SnowforSanta, msg, Vector2{screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight}, 38, 5, GetColor(0x052c46ff));
+        DrawTextEx(coolvetica_rg, msg2, Vector2{screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 30}, 22, 2, WHITE);
 
         EndDrawing();
     }
