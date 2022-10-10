@@ -124,7 +124,7 @@ int main()
     int numFramesIdle = 1;
     int numFramesRun = 11;
     int numFramesJump = 1;
-    int numFramesDead = 17;
+    int numFramesDead = 10;
 
     float idle_FrameWidth = (float)(santa_Idle.width / numFramesIdle);
     float run_FrameWidth = (float)(santa_Run.width / numFramesRun);
@@ -168,8 +168,8 @@ int main()
     objectRectJump.width = jump_FrameWidth;
     objectRectJump.height = jump_FrameHeight;
 
-    objectRectIdle.width = dead_FrameWidth;
-    objectRectIdle.height = dead_FrameHeight;
+    objectRectDead.width = dead_FrameWidth;
+    objectRectDead.height = dead_FrameHeight;
 
     Vector2 santa_IdleCentre = {(idle_FrameWidth / 2), (idle_FrameHeight / 2)};
     Vector2 santa_RunCentre = {(run_FrameWidth / 2), (run_FrameHeight / 2)};
@@ -417,7 +417,7 @@ int main()
 
                 if (currentFrame >= numFramesDead)
                 {
-                    currentFrame = 1;
+                    currentFrame--; // do animation once and stop
                 }
             }
 
@@ -445,7 +445,7 @@ int main()
 
         const int textWidth_SnowforSanta = MeasureTextEx(SnowforSanta, msg, 38, 5).x;    //(font type, message, font size, font spacing)
         const int textWidth_coolvetica_rg = MeasureTextEx(coolvetica_rg, msg2, 22, 2).x; //(font type, message, font size, font spacing)
-        const int textWidth_SnowforSanta1 = MeasureTextEx(SnowforSanta, msg3, 38, 5).x;  //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta1 = MeasureTextEx(SnowforSanta, msg3, 40, 5).x;  //(font type, message, font size, font spacing)
 
         // Draw Xmas presents
         if (!gameOver)
@@ -459,7 +459,7 @@ int main()
 
         if (gameOver)
         {
-            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 38, 5, GetColor(0x052c46ff));
+            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 40, 5, GetColor(0x052c46ff));
         }
 
         // Draw lines in centre of screen for reference
