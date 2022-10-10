@@ -15,7 +15,8 @@ enum Animations
 {
     Idle,
     Run,
-    Jump
+    Jump,
+    Dead
 };
 
 enum JumpDirection
@@ -26,8 +27,17 @@ enum JumpDirection
 
 Animations animations{Animations::Idle};
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Global Variables Declaration
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 float screenWidth = 1280.f; // Set the screen width of the window to 1280px,
 float screenHeight = 720.f; // Set the screen height of the window to 720px,
+
+// static int score = 0;
+// static int hiScore = 0;
+static bool gameOver = false;
+static bool retry = true;
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Program main entry point of game
@@ -47,12 +57,11 @@ int main()
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Load Music and intitialise volume settings
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Music main_sound = LoadMusicStream("resources/audio/drama-tension.wav"); // Music by <a href="https://pixabay.com/users/musictown-25873992/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=113757">Musictown</a></a>
-    // Music menu_voice = LoadMusicStream("resources/audio/SANTA_CLAUS-You're_on_the_naughty_list.mp3");
-    // menu_voice.looping = false;
-    // main_sound.looping = true;
-    // SetMusicVolume(menu_voice, 0.3f);
-    // SetMusicVolume(main_sound, 0.05f);
+    Music main_sound = LoadMusicStream("resources/audio/drama-tension.wav"); // Music by <a href="https://pixabay.com/users/musictown-25873992/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=113757">Musictown</a></a>
+    Music menu_voice = LoadMusicStream("resources/audio/SANTA_CLAUS-You're_on_the_naughty_list.mp3");
+    SetMusicVolume(menu_voice, 0.3f);
+    SetMusicVolume(main_sound, 0.05f);
+    float timePlayed = 0.0f;
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Booleans
@@ -65,7 +74,7 @@ int main()
 
     xmasPresent[0] = LoadTexture("resources/sprites/xmas_present1.png");
     xmasPresent[1] = LoadTexture("resources/sprites/xmas_present2.png");
-    Vector2 xPOrigin[2]{};
+    // Vector2 xPOrigin[2]{};
 
     float const xpScale = 0.015; // 10%
 
@@ -81,8 +90,8 @@ int main()
         xPDestRect[i].x = 0;
         xPDestRect[i].y = 0;
 
-        xPOrigin[i].x = (float)xmasPresent[i].width / 2 * xpScale;
-        xPOrigin[i].y = (float)xmasPresent[i].height / 2 * xpScale;
+        // xPOrigin[i].x = (float)xmasPresent[i].width / 2 * xpScale;
+        // xPOrigin[i].y = (float)xmasPresent[i].height / 2 * xpScale;
         std::cout << "testing value of i - for i < 2, i should return twice\n"; // debugging test expression
     }
 
@@ -107,6 +116,7 @@ int main()
     Texture2D santa_Idle = LoadTexture("resources/sprites/idle_spritesheet_single.png");
     Texture2D santa_Run = LoadTexture("resources/sprites/run_spritesheet.png");
     Texture2D santa_Jump = LoadTexture("resources/sprites/jump_spritesheet_single.png");
+    Texture2D santa_Dead = LoadTexture("resources/sprites/dead_spritesheet.png");
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Variables
@@ -114,14 +124,17 @@ int main()
     int numFramesIdle = 1;
     int numFramesRun = 11;
     int numFramesJump = 1;
+    int numFramesDead = 17;
 
     float idle_FrameWidth = (float)(santa_Idle.width / numFramesIdle);
     float run_FrameWidth = (float)(santa_Run.width / numFramesRun);
     float jump_FrameWidth = (float)(santa_Jump.width / numFramesJump);
+    float dead_FrameWidth = (float)(santa_Dead.width / numFramesDead);
 
     float idle_FrameHeight = santa_Idle.height;
     float run_FrameHeight = santa_Run.height;
     float jump_FrameHeight = santa_Jump.height;
+    float dead_FrameHeight = santa_Dead.height;
 
     int currentFrame = 0;
     float frameCounter = 0.f;
@@ -137,10 +150,12 @@ int main()
     Rectangle idle_DestRec = {screenWidth / 2.f, screenHeight / 2.f, idle_FrameWidth, idle_FrameHeight};
     Rectangle run_DestRec = {screenWidth / 2.f, screenHeight / 2.f, run_FrameWidth, run_FrameHeight};
     Rectangle jump_DestRec = {screenWidth / 2.f, screenHeight / 2.f, jump_FrameWidth, jump_FrameHeight};
+    Rectangle dead_DestRec = {screenWidth / 2.f, screenHeight / 2.f, dead_FrameWidth, dead_FrameHeight};
 
     Rectangle objectRectIdle{};
     Rectangle objectRectRun{};
     Rectangle objectRectJump{};
+    Rectangle objectRectDead{};
 
     Rectangle tmpRect;
 
@@ -153,9 +168,13 @@ int main()
     objectRectJump.width = jump_FrameWidth;
     objectRectJump.height = jump_FrameHeight;
 
+    objectRectIdle.width = dead_FrameWidth;
+    objectRectIdle.height = dead_FrameHeight;
+
     Vector2 santa_IdleCentre = {(idle_FrameWidth / 2), (idle_FrameHeight / 2)};
     Vector2 santa_RunCentre = {(run_FrameWidth / 2), (run_FrameHeight / 2)};
     Vector2 santa_JumpCentre = {(jump_FrameWidth / 2), (jump_FrameHeight / 2)};
+    Vector2 santa_DeadCentre = {(dead_FrameWidth / 2), (dead_FrameHeight / 2)};
 
     SetTargetFPS(144); // Set the target frames per second to 144FPS
     //-----------------------------------------------------------------------------------------------------------------------
@@ -174,14 +193,37 @@ int main()
         else if (pause)
             animations = Idle;
 
+        if (gameOver)
+        {
+            animations = Dead;
+        }
+
         frameCounter += deltaTime;
 
         //-------------------------------------------------------------------------------------------------------------------
         // Sounds
         //-------------------------------------------------------------------------------------------------------------------
-        // UpdateMusicStream(main_sound);
-        // UpdateMusicStream(menu_voice);
-        // PlayMusicStream(menu_voice);
+        UpdateMusicStream(main_sound);
+        UpdateMusicStream(menu_voice);
+
+        if (!pause && !gameOver)
+        {
+            PlayMusicStream(main_sound);
+            timePlayed = GetMusicTimePlayed(main_sound) / GetMusicTimeLength(main_sound);
+            if (timePlayed >= 1.0f)
+                SeekMusicStream(main_sound, 0);
+            StopMusicStream(menu_voice);
+        }
+
+        if (pause || gameOver)
+        {
+            PlayMusicStream(menu_voice);
+        }
+
+        if (gameOver)
+        {
+            StopMusicStream(main_sound);
+        }
 
         //-------------------------------------------------------------------------------------------------------------------
         // Logic (detect user interaction)
@@ -189,40 +231,56 @@ int main()
 
         if (IsKeyPressed(KEY_P))
         {
-            pause = !pause;
-            if (pause)
+            if (animations != Dead)
             {
-                // PauseMusicStream(main_sound);
-                animations = Idle;
+                if (!gameOver)
+                {
+                    pause = !pause;
+                    if (pause)
+
+                        PauseMusicStream(main_sound);
+                    animations = Idle;
+                }
             }
-            // else
-            //  ResumeMusicStream(main_sound);
         }
 
         if (IsKeyPressed(KEY_SPACE))
         {
-            if (!pause)
+            if (animations != Dead)
             {
-
-                if (animations != Jump)
+                if (!pause)
                 {
-                    animations = Jump;
-                    jumpdirection = Up;
-                    jump_DestRec.y = run_DestRec.y;
+
+                    if (animations != Jump)
+                    {
+                        animations = Jump;
+                        jumpdirection = Up;
+                        jump_DestRec.y = run_DestRec.y;
+                    }
                 }
             }
         }
 
         if (IsKeyDown(KEY_D))
         {
-            if (!pause)
+            if (animations != Dead)
             {
+                if (!pause)
+                {
+                    animations = Run;
+                }
+            }
+        }
+
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            if (retry)
+            {
+                gameOver = false;
+                pause = false;
                 animations = Run;
-
-                // playAudio = !playAudio;
-
-                // if (playAudio)
-                //  PlayMusicStream(main_sound);
+                StopMusicStream(menu_voice);
+                PlayMusicStream(main_sound);
             }
         }
 
@@ -238,31 +296,39 @@ int main()
             bg_SourceRec.x = 0;
 
         // scrolling of the xmas presents
-        if (!pause)
+        if (!gameOver)
         {
-            for (int i = 0; i < 2; i++)
+            if (!pause)
             {
-                xPDestRect[i].y = ground;
-                if (xPDestRect[i].x < GetRandomValue(-500, -200)) // min / max
+                for (int i = 0; i < 2; i++)
                 {
-                    xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
-                }
-                else
-                    xPDestRect[i].x -= scrollSpeed * deltaTime;
+                    xPDestRect[i].y = ground;
+                    if (xPDestRect[i].x < GetRandomValue(-500, -200)) // min / max
+                    {
+                        xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
+                    }
+                    else
+                        xPDestRect[i].x -= scrollSpeed * deltaTime;
 
-                if (animations != Jump)
-                    tmpRect = run_DestRec;
-                else
-                    tmpRect = jump_DestRec;
-                if (CheckCollisionCircles(Vector2{tmpRect.x, tmpRect.y}, tmpRect.width / 4,
-                                          Vector2{xPDestRect[i].x + xPDestRect[i].width / 2, xPDestRect[i].y + xPDestRect[i].height / 2}, xPDestRect[i].width / 2))
-                {
-                    xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
+                    if (animations != Jump)
+                        tmpRect = run_DestRec;
+                    else
+                        tmpRect = jump_DestRec;
+                    if (CheckCollisionCircles(Vector2{tmpRect.x, tmpRect.y}, tmpRect.width / 4,
+                                              Vector2{xPDestRect[i].x + xPDestRect[i].width / 2, xPDestRect[i].y + xPDestRect[i].height / 2}, xPDestRect[i].width / 2))
+                    {
+                        xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
+
+                        gameOver = true;
+                        animations = Dead;
+                        pause = true;
+                        std::cout << "Game Over\n";
+                    }
                 }
             }
         }
 
-        // jump
+        // animations
         if (animations == Jump)
         {
             if (jumpdirection == Up)
@@ -342,6 +408,24 @@ int main()
             objectRectJump.y = 0; // initial ground position Y of the player
             objectRectJump.width = jump_FrameWidth;
             break;
+
+        case Animations::Dead:
+            if (frameCounter >= frameTime)
+            {
+                frameCounter = 0.f;
+                currentFrame++;
+
+                if (currentFrame >= numFramesDead)
+                {
+                    currentFrame = 1;
+                }
+            }
+
+            objectRectDead.x = dead_FrameWidth * currentFrame;
+            objectRectDead.y = 0; // initial ground position Y of the player
+            objectRectDead.width = dead_FrameWidth;
+            dead_DestRec.y = ground;
+            break;
         }
 
         //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -355,18 +439,28 @@ int main()
 
         DrawFPS(10, 10);
 
-        // Draw Xmas presents
-        if (!pause)
-        {
-            for (int i = 0; i < 2; i++)
-                DrawTexturePro(xmasPresent[i], xPSourceRect[i], xPDestRect[i], Vector2Zero(), 0, WHITE);
-        }
-
         const char *msg = {"Naughty List"};
         const char *msg2 = {"by Rob N"};
+        const char *msg3 = {"Game Over! Press ENTER to retry"};
 
         const int textWidth_SnowforSanta = MeasureTextEx(SnowforSanta, msg, 38, 5).x;    //(font type, message, font size, font spacing)
         const int textWidth_coolvetica_rg = MeasureTextEx(coolvetica_rg, msg2, 22, 2).x; //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta1 = MeasureTextEx(SnowforSanta, msg3, 38, 5).x;  //(font type, message, font size, font spacing)
+
+        // Draw Xmas presents
+        if (!gameOver)
+        {
+            if (!pause)
+            {
+                for (int i = 0; i < 2; i++)
+                    DrawTexturePro(xmasPresent[i], xPSourceRect[i], xPDestRect[i], Vector2Zero(), 0, WHITE);
+            }
+        }
+
+        if (gameOver)
+        {
+            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 38, 5, GetColor(0x052c46ff));
+        }
 
         // Draw lines in centre of screen for reference
         // DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, RED);
@@ -374,8 +468,6 @@ int main()
 
         // Draw line on top of screen for reference
         // DrawLine(0, screenHeight - screenHeight, screenWidth, screenHeight - screenHeight, BLACK);
-
-        // DrawTexturePro(Texture, objectRect, destination, objectCenter, rotation, WHITE);
 
         switch (animations)
         {
@@ -390,10 +482,14 @@ int main()
         case Animations::Jump:
             DrawTexturePro(santa_Jump, objectRectJump, jump_DestRec, santa_JumpCentre, 0, WHITE);
             break;
+
+        case Animations::Dead:
+            DrawTexturePro(santa_Dead, objectRectDead, dead_DestRec, santa_DeadCentre, 0, WHITE);
+            break;
         }
 
-        DrawTextEx(SnowforSanta, msg, Vector2{screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight}, 38, 5, GetColor(0x052c46ff));
-        DrawTextEx(coolvetica_rg, msg2, Vector2{screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 30}, 22, 2, WHITE);
+        DrawTextEx(SnowforSanta, msg, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight}, 38, 5, GetColor(0x052c46ff));
+        DrawTextEx(coolvetica_rg, msg2, (Vector2){screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 30}, 22, 2, WHITE);
 
         EndDrawing();
     }
@@ -401,15 +497,17 @@ int main()
     //-------------------------------------------------------------------------------------------------------------------------------------------------
     // De-Initilisation
     //-------------------------------------------------------------------------------------------------------------------------------------------------
+    UnloadTexture(santa_Idle);
     UnloadTexture(santa_Run);
     UnloadTexture(santa_Jump);
+    UnloadTexture(santa_Dead);
     UnloadTexture(bg_image);
     UnloadTexture(xmasPresent[0]);
     UnloadTexture(xmasPresent[1]);
     UnloadFont(SnowforSanta);
     UnloadFont(coolvetica_rg);
-    // UnloadMusicStream(main_sound);
-    // UnloadMusicStream(menu_voice);
+    UnloadMusicStream(main_sound);
+    UnloadMusicStream(menu_voice);
 
     CloseWindow();
     //-------------------------------------------------------------------------------------------------------------------------------------------------
