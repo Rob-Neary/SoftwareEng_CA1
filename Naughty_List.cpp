@@ -9,8 +9,6 @@
 // Define Types
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-using namespace std;
-
 enum Animations
 {
     Idle,
@@ -59,9 +57,22 @@ int main()
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     Music main_sound = LoadMusicStream("resources/audio/drama-tension.wav"); // Music by <a href="https://pixabay.com/users/musictown-25873992/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=113757">Musictown</a></a>
     Music menu_voice = LoadMusicStream("resources/audio/SANTA_CLAUS-You're_on_the_naughty_list.mp3");
+    Music footsteps_sound = LoadMusicStream("resources/audio/effects/snow_footsteps.wav");
+    Music xmas_ambience = LoadMusicStream("resources/audio/Santa sleigh flying sounds Christmas Ambience Sound Effects.mp3");
+
     SetMusicVolume(menu_voice, 0.3f);
     SetMusicVolume(main_sound, 0.05f);
+    SetMusicVolume(footsteps_sound, 0.3f);
+    SetMusicVolume(xmas_ambience, 0.04f);
     float timePlayed = 0.0f;
+
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // Load Sounds
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    Sound fall_sound = LoadSound("resources/audio/effects/fall_soundeffect.wav");
+    Sound die_sound = LoadSound("resources/audio/effects/death_soundeffect.wav");
+    SetSoundVolume(die_sound, 0.1f);
+    SetSoundVolume(fall_sound, 0.3f);
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Booleans
@@ -76,7 +87,7 @@ int main()
     xmasPresent[1] = LoadTexture("resources/sprites/xmas_present2.png");
     // Vector2 xPOrigin[2]{};
 
-    float const xpScale = 0.015; // 10%
+    float const xpScale = 0.015; // initialise presents scale
 
     for (int i = 0; i < 2; i++) // initialise variable i to 0 (initialised only once); boolean(test) expression, if i is less than 2 execute code within for loop; update i by 1 and re-execute test expression until condition is met
     {
@@ -85,8 +96,8 @@ int main()
         xPSourceRect[i].height = xmasPresent[i].height;
         xPSourceRect[i].width = xmasPresent[i].width;
 
-        xPDestRect[i].height = xmasPresent[i].height * xpScale;
-        xPDestRect[i].width = xmasPresent[i].width * xpScale;
+        xPDestRect[i].height = xmasPresent[i].height * xpScale; // set presents scale
+        xPDestRect[i].width = xmasPresent[i].width * xpScale;   // set presents scale
         xPDestRect[i].x = 0;
         xPDestRect[i].y = 0;
 
@@ -99,6 +110,17 @@ int main()
     // Load Textures
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     Texture2D bg_image = LoadTexture("resources/images/bg_image1.png");
+    Texture2D pressEnterToPlay = LoadTexture("resources/images/UI/pressEnterToPlay.png");
+    Texture2D score = LoadTexture("resources/images/UI/score.png");
+
+    float const scoreScale = 0.24;
+    float const enterScale = 0.5;
+
+    pressEnterToPlay.width = pressEnterToPlay.width * enterScale;
+    pressEnterToPlay.height = pressEnterToPlay.height * enterScale;
+
+    score.width = score.width * scoreScale;
+    score.height = score.height * scoreScale;
 
     Rectangle bg_SourceRec = {};
     Rectangle bg_DestRec = {};
@@ -112,6 +134,25 @@ int main()
     bg_DestRec.y = 0;
     bg_DestRec.width = screenWidth;
     bg_DestRec.height = screenHeight;
+
+    // Rectangle enterToPlay_Rec = {};
+    // Rectangle score_Rec = {};
+
+    // enterToPlay_Rec.x = 0;
+    // enterToPlay_Rec.y = 0;
+    // enterToPlay_Rec.width = screenWidth / 2;
+    // enterToPlay_Rec.height = screenHeight / 2;
+
+    // score_Rec.x = 0;
+    // score_Rec.y = 0;
+    // score_Rec.width = screenWidth / 2;
+    // score_Rec.height = screenHeight / 2;
+
+    // enterToPlay_Rec = {screenWidth / 2.f, screenHeight / 2.f, score_Rec.width, score_Rec.height};
+    // score_Rec = {screenWidth / 2.f, screenHeight / 2.f, score_Rec.width, score_Rec.height};
+
+    // Vector2 enterToPlay_Centre = {(screenWidth / 2), (screenHeight / 2)};
+    // Vector2 score_Centre = {(screenWidth / 2), (screenHeight / 2)};
 
     Texture2D santa_Idle = LoadTexture("resources/sprites/idle_spritesheet_single.png");
     Texture2D santa_Run = LoadTexture("resources/sprites/run_spritesheet.png");
@@ -145,6 +186,8 @@ int main()
     float const jumpSpeedDown = 500.f;
     float maxJumpHeight = 330.f;
     float scrollSpeed = 700.f;
+    // int playerScore = 0;
+
     JumpDirection jumpdirection;
 
     Rectangle idle_DestRec = {screenWidth / 2.f, screenHeight / 2.f, idle_FrameWidth, idle_FrameHeight};
@@ -189,6 +232,7 @@ int main()
         if (animations != Jump && !pause)
         {
             animations = Run;
+            PlayMusicStream(footsteps_sound);
         }
         else if (pause)
             animations = Idle;
@@ -205,24 +249,33 @@ int main()
         //-------------------------------------------------------------------------------------------------------------------
         UpdateMusicStream(main_sound);
         UpdateMusicStream(menu_voice);
+        UpdateMusicStream(xmas_ambience);
+        UpdateMusicStream(footsteps_sound);
 
         if (!pause && !gameOver)
         {
             PlayMusicStream(main_sound);
+            PlayMusicStream(xmas_ambience);
             timePlayed = GetMusicTimePlayed(main_sound) / GetMusicTimeLength(main_sound);
             if (timePlayed >= 1.0f)
                 SeekMusicStream(main_sound, 0);
             StopMusicStream(menu_voice);
         }
 
-        if (pause || gameOver)
+        if (pause)
         {
             PlayMusicStream(menu_voice);
+            PauseMusicStream(main_sound);
+            PauseMusicStream(footsteps_sound);
+            PauseSound(fall_sound);
         }
 
         if (gameOver)
         {
             StopMusicStream(main_sound);
+            StopMusicStream(footsteps_sound);
+            StopMusicStream(xmas_ambience);
+            StopSound(fall_sound);
         }
 
         //-------------------------------------------------------------------------------------------------------------------
@@ -239,6 +292,8 @@ int main()
                     if (pause)
 
                         PauseMusicStream(main_sound);
+                    PauseMusicStream(footsteps_sound);
+                    PauseSound(fall_sound);
                     animations = Idle;
                 }
             }
@@ -254,6 +309,7 @@ int main()
                     if (animations != Jump)
                     {
                         animations = Jump;
+                        StopMusicStream(footsteps_sound);
                         jumpdirection = Up;
                         jump_DestRec.y = run_DestRec.y;
                     }
@@ -279,8 +335,10 @@ int main()
                 gameOver = false;
                 pause = false;
                 animations = Run;
+                PlayMusicStream(footsteps_sound);
                 StopMusicStream(menu_voice);
                 PlayMusicStream(main_sound);
+                PlayMusicStream(xmas_ambience);
             }
         }
 
@@ -291,6 +349,9 @@ int main()
         // background image scroll
         if (!pause)
             bg_SourceRec.x += scrollSpeed * deltaTime;
+
+        if (gameOver)
+            bg_SourceRec.x = 0 * deltaTime;
 
         if (bg_SourceRec.x >= bg_image.width)
             bg_SourceRec.x = 0;
@@ -319,8 +380,11 @@ int main()
                     {
                         xPDestRect[i].x = GetRandomValue(200, 500) + screenWidth;
 
-                        gameOver = true;
+                        PlaySoundMulti(fall_sound);
+                        PlaySoundMulti(die_sound);
+                        StopMusicStream(footsteps_sound);
                         animations = Dead;
+                        gameOver = true;
                         pause = true;
                         std::cout << "Game Over\n";
                     }
@@ -437,15 +501,17 @@ int main()
         // Draw background image
         DrawTexturePro(bg_image, bg_SourceRec, bg_DestRec, Vector2Zero(), 0, WHITE);
 
-        DrawFPS(10, 10);
+        DrawFPS(1150, 10);
 
         const char *msg = {"Naughty List"};
         const char *msg2 = {"by Rob N"};
         const char *msg3 = {"Game Over! Press ENTER to retry"};
+        const char *msg4 = {"Game Paused - press P to continue"};
 
         const int textWidth_SnowforSanta = MeasureTextEx(SnowforSanta, msg, 38, 5).x;    //(font type, message, font size, font spacing)
         const int textWidth_coolvetica_rg = MeasureTextEx(coolvetica_rg, msg2, 22, 2).x; //(font type, message, font size, font spacing)
         const int textWidth_SnowforSanta1 = MeasureTextEx(SnowforSanta, msg3, 40, 5).x;  //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta2 = MeasureTextEx(SnowforSanta, msg4, 40, 5).x;  //(font type, message, font size, font spacing)
 
         // Draw Xmas presents
         if (!gameOver)
@@ -454,12 +520,28 @@ int main()
             {
                 for (int i = 0; i < 2; i++)
                     DrawTexturePro(xmasPresent[i], xPSourceRect[i], xPDestRect[i], Vector2Zero(), 0, WHITE);
+                DrawText("TEST", screenWidth / 2, screenHeight / 2, 30, BLUE);
             }
+        }
+
+        if (!gameOver && !pause)
+        {
+            DrawTexture(score, 200 - score.width / 2, 100 - score.height / 2, WHITE);
         }
 
         if (gameOver)
         {
-            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 40, 5, GetColor(0x052c46ff));
+            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 40, 5, RED);
+        }
+
+        if (pause && !gameOver && !bg_SourceRec.x == 0)
+        {
+            DrawTextEx(SnowforSanta, msg4, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta2 / (float)2), screenHeight - screenHeight / 2}, 40, 5, GetColor(0x052c46ff));
+        }
+
+        if (pause && bg_SourceRec.x == 0 && !gameOver)
+        {
+            DrawTexture(pressEnterToPlay, screenWidth / 2 - pressEnterToPlay.width / 2, screenHeight / 2 - pressEnterToPlay.height / 2, WHITE);
         }
 
         // Draw lines in centre of screen for reference
@@ -504,10 +586,16 @@ int main()
     UnloadTexture(bg_image);
     UnloadTexture(xmasPresent[0]);
     UnloadTexture(xmasPresent[1]);
+    UnloadTexture(pressEnterToPlay);
+    UnloadTexture(score);
     UnloadFont(SnowforSanta);
     UnloadFont(coolvetica_rg);
     UnloadMusicStream(main_sound);
     UnloadMusicStream(menu_voice);
+    UnloadMusicStream(footsteps_sound);
+    UnloadMusicStream(xmas_ambience);
+    UnloadSound(fall_sound);
+    UnloadSound(die_sound);
 
     CloseWindow();
     //-------------------------------------------------------------------------------------------------------------------------------------------------
