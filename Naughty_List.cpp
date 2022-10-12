@@ -59,12 +59,12 @@ int main()
     Music main_sound = LoadMusicStream("resources/audio/drama-tension.wav"); // Music by <a href="https://pixabay.com/users/musictown-25873992/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=113757">Musictown</a></a>
     Music menu_voice = LoadMusicStream("resources/audio/SANTA_CLAUS-You're_on_the_naughty_list.mp3");
     Music footsteps_sound = LoadMusicStream("resources/audio/effects/snow_footsteps.wav");
-    Music xmas_ambience = LoadMusicStream("resources/audio/Santa sleigh flying sounds Christmas Ambience Sound Effects.mp3");
+    Music xmas_ambience = LoadMusicStream("resources/audio/ChristmasAmbienceSoundEffects.wav");
 
     SetMusicVolume(menu_voice, 0.3f);
-    SetMusicVolume(main_sound, 0.05f);
-    SetMusicVolume(footsteps_sound, 0.3f);
-    SetMusicVolume(xmas_ambience, 0.07f);
+    SetMusicVolume(main_sound, 0.1f);
+    SetMusicVolume(footsteps_sound, 0.8f);
+    SetMusicVolume(xmas_ambience, 0.2f);
     float timePlayed = 0.0f;
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
