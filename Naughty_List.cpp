@@ -14,7 +14,8 @@ enum Animations
     Idle,
     Run,
     Jump,
-    Dead
+    Dead,
+    Hide
 };
 
 enum JumpDirection
@@ -32,10 +33,10 @@ Animations animations{Animations::Idle};
 float screenWidth = 1280.f; // Set the screen width of the window to 1280px,
 float screenHeight = 720.f; // Set the screen height of the window to 720px,
 
-// static int score = 0;
-// static int hiScore = 0;
 static bool gameOver = false;
 static bool retry = true;
+static int playerScore = 0;
+// static int hiScore = 0;
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Program main entry point of game
@@ -63,7 +64,7 @@ int main()
     SetMusicVolume(menu_voice, 0.3f);
     SetMusicVolume(main_sound, 0.05f);
     SetMusicVolume(footsteps_sound, 0.3f);
-    SetMusicVolume(xmas_ambience, 0.04f);
+    SetMusicVolume(xmas_ambience, 0.07f);
     float timePlayed = 0.0f;
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -85,9 +86,10 @@ int main()
 
     xmasPresent[0] = LoadTexture("resources/sprites/xmas_present1.png");
     xmasPresent[1] = LoadTexture("resources/sprites/xmas_present2.png");
-    // Vector2 xPOrigin[2]{};
 
     float const xpScale = 0.015; // initialise presents scale
+    float const ground = 560.f;
+    float const maxJumpHeight = 330.f;
 
     for (int i = 0; i < 2; i++) // initialise variable i to 0 (initialised only once); boolean(test) expression, if i is less than 2 execute code within for loop; update i by 1 and re-execute test expression until condition is met
     {
@@ -101,8 +103,6 @@ int main()
         xPDestRect[i].x = 0;
         xPDestRect[i].y = 0;
 
-        // xPOrigin[i].x = (float)xmasPresent[i].width / 2 * xpScale;
-        // xPOrigin[i].y = (float)xmasPresent[i].height / 2 * xpScale;
         std::cout << "testing value of i - for i < 2, i should return twice\n"; // debugging test expression
     }
 
@@ -113,8 +113,8 @@ int main()
     Texture2D pressEnterToPlay = LoadTexture("resources/images/UI/pressEnterToPlay.png");
     Texture2D score = LoadTexture("resources/images/UI/score.png");
 
-    float const scoreScale = 0.24;
-    float const enterScale = 0.5;
+    float const scoreScale = 0.28;
+    float const enterScale = 0.7;
 
     pressEnterToPlay.width = pressEnterToPlay.width * enterScale;
     pressEnterToPlay.height = pressEnterToPlay.height * enterScale;
@@ -134,25 +134,6 @@ int main()
     bg_DestRec.y = 0;
     bg_DestRec.width = screenWidth;
     bg_DestRec.height = screenHeight;
-
-    // Rectangle enterToPlay_Rec = {};
-    // Rectangle score_Rec = {};
-
-    // enterToPlay_Rec.x = 0;
-    // enterToPlay_Rec.y = 0;
-    // enterToPlay_Rec.width = screenWidth / 2;
-    // enterToPlay_Rec.height = screenHeight / 2;
-
-    // score_Rec.x = 0;
-    // score_Rec.y = 0;
-    // score_Rec.width = screenWidth / 2;
-    // score_Rec.height = screenHeight / 2;
-
-    // enterToPlay_Rec = {screenWidth / 2.f, screenHeight / 2.f, score_Rec.width, score_Rec.height};
-    // score_Rec = {screenWidth / 2.f, screenHeight / 2.f, score_Rec.width, score_Rec.height};
-
-    // Vector2 enterToPlay_Centre = {(screenWidth / 2), (screenHeight / 2)};
-    // Vector2 score_Centre = {(screenWidth / 2), (screenHeight / 2)};
 
     Texture2D santa_Idle = LoadTexture("resources/sprites/idle_spritesheet_single.png");
     Texture2D santa_Run = LoadTexture("resources/sprites/run_spritesheet.png");
@@ -181,14 +162,14 @@ int main()
     float frameCounter = 0.f;
     float frameTime = 1.f / 15.f;
     float deltaTime = 0.f; // initialise as 0 here, get current time at beginning of loop
-    float const ground = 560.f;
+    int blinkFrames = 0;   // pause blink text
+
     float const jumpSpeedUp = 800.f;
     float const jumpSpeedDown = 500.f;
-    float maxJumpHeight = 330.f;
     float scrollSpeed = 700.f;
-    // int playerScore = 0;
 
     JumpDirection jumpdirection;
+    Rectangle tmpRect;
 
     Rectangle idle_DestRec = {screenWidth / 2.f, screenHeight / 2.f, idle_FrameWidth, idle_FrameHeight};
     Rectangle run_DestRec = {screenWidth / 2.f, screenHeight / 2.f, run_FrameWidth, run_FrameHeight};
@@ -199,8 +180,6 @@ int main()
     Rectangle objectRectRun{};
     Rectangle objectRectJump{};
     Rectangle objectRectDead{};
-
-    Rectangle tmpRect;
 
     objectRectIdle.width = idle_FrameWidth;
     objectRectIdle.height = idle_FrameHeight;
@@ -241,7 +220,6 @@ int main()
         {
             animations = Dead;
         }
-
         frameCounter += deltaTime;
 
         //-------------------------------------------------------------------------------------------------------------------
@@ -349,6 +327,8 @@ int main()
         // background image scroll
         if (!pause)
             bg_SourceRec.x += scrollSpeed * deltaTime;
+        else
+            blinkFrames++;
 
         if (gameOver)
             bg_SourceRec.x = 0 * deltaTime;
@@ -360,6 +340,7 @@ int main()
         if (!gameOver)
         {
             if (!pause)
+
             {
                 for (int i = 0; i < 2; i++)
                 {
@@ -386,7 +367,16 @@ int main()
                         animations = Dead;
                         gameOver = true;
                         pause = true;
+                        playerScore = 0;
                         std::cout << "Game Over\n";
+                    }
+
+                    else if ((santa_JumpCentre.x > xPDestRect[i].x) && !gameOver)
+                    {
+                        playerScore += 1;
+
+                        // if (playerScore > hiScore)
+                        //  hiScore = playerScore;
                     }
                 }
             }
@@ -490,6 +480,9 @@ int main()
             objectRectDead.width = dead_FrameWidth;
             dead_DestRec.y = ground;
             break;
+
+        case Animations::Hide:
+            break;
         }
 
         //----------------------------------------------------------------------------------------------------------------------------------------------
@@ -503,15 +496,17 @@ int main()
 
         DrawFPS(1150, 10);
 
-        const char *msg = {"Naughty List"};
+        const char *msg1 = {"Naughty List"};
         const char *msg2 = {"by Rob N"};
-        const char *msg3 = {"Game Over! Press ENTER to retry"};
-        const char *msg4 = {"Game Paused - press P to continue"};
+        const char *msg3 = {"You Died! Press [ENTER] to Try Again"};
+        const char *msg4 = {"Game Paused"};
+        const char *msg5 = {"Press [P] or [ENTER] to Continue"};
 
-        const int textWidth_SnowforSanta = MeasureTextEx(SnowforSanta, msg, 38, 5).x;    //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta = MeasureTextEx(SnowforSanta, msg1, 50, 15).x;  //(font type, message, font size, font spacing)
         const int textWidth_coolvetica_rg = MeasureTextEx(coolvetica_rg, msg2, 22, 2).x; //(font type, message, font size, font spacing)
         const int textWidth_SnowforSanta1 = MeasureTextEx(SnowforSanta, msg3, 40, 5).x;  //(font type, message, font size, font spacing)
-        const int textWidth_SnowforSanta2 = MeasureTextEx(SnowforSanta, msg4, 40, 5).x;  //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta2 = MeasureTextEx(SnowforSanta, msg4, 46, 5).x;  //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta3 = MeasureTextEx(SnowforSanta, msg5, 40, 5).x;  //(font type, message, font size, font spacing)
 
         // Draw Xmas presents
         if (!gameOver)
@@ -520,13 +515,13 @@ int main()
             {
                 for (int i = 0; i < 2; i++)
                     DrawTexturePro(xmasPresent[i], xPSourceRect[i], xPDestRect[i], Vector2Zero(), 0, WHITE);
-                DrawText("TEST", screenWidth / 2, screenHeight / 2, 30, BLUE);
             }
         }
 
         if (!gameOver && !pause)
         {
-            DrawTexture(score, 200 - score.width / 2, 100 - score.height / 2, WHITE);
+            DrawTexture(score, 160 - score.width / 2, 120 - score.height / 2, RAYWHITE);
+            DrawText(TextFormat("%4i", playerScore), 127, 130, 30, DARKBLUE);
         }
 
         if (gameOver)
@@ -536,12 +531,18 @@ int main()
 
         if (pause && !gameOver && !bg_SourceRec.x == 0)
         {
-            DrawTextEx(SnowforSanta, msg4, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta2 / (float)2), screenHeight - screenHeight / 2}, 40, 5, GetColor(0x052c46ff));
+            DrawTextEx(SnowforSanta, msg5, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta3 / (float)2), screenHeight - screenHeight / 2}, 40, 5, DARKGREEN);
+
+            if ((blinkFrames / 30) % 3)
+            {
+                DrawTextEx(SnowforSanta, msg4, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta2 / (float)2), screenHeight - screenHeight / 2 - 100}, 46, 5, ColorFromHSV(0, 100, 53));
+            }
         }
 
         if (pause && bg_SourceRec.x == 0 && !gameOver)
         {
-            DrawTexture(pressEnterToPlay, screenWidth / 2 - pressEnterToPlay.width / 2, screenHeight / 2 - pressEnterToPlay.height / 2, WHITE);
+            DrawTexture(pressEnterToPlay, screenWidth / 2 - pressEnterToPlay.width / 2, screenHeight / 2 - pressEnterToPlay.height / 2 + 30, WHITE);
+            animations = Hide;
         }
 
         // Draw lines in centre of screen for reference
@@ -568,10 +569,13 @@ int main()
         case Animations::Dead:
             DrawTexturePro(santa_Dead, objectRectDead, dead_DestRec, santa_DeadCentre, 0, WHITE);
             break;
+
+        case Animations::Hide:
+            break;
         }
 
-        DrawTextEx(SnowforSanta, msg, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight}, 38, 5, GetColor(0x052c46ff));
-        DrawTextEx(coolvetica_rg, msg2, (Vector2){screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 30}, 22, 2, WHITE);
+        DrawTextEx(SnowforSanta, msg1, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight + 20}, 50, 15, GetColor(0x052c46ff));
+        DrawTextEx(coolvetica_rg, msg2, (Vector2){screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 70}, 22, 2, WHITE);
 
         EndDrawing();
     }
