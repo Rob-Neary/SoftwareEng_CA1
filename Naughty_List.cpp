@@ -5,6 +5,7 @@
 #include "raylib.h"  // Raylib library
 #include "raymath.h" // Raymath library
 #include <iostream>  // iostream library
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Define Types
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,7 +37,7 @@ float screenHeight = 720.f; // Set the screen height of the window to 720px,
 static bool gameOver = false;
 static bool retry = true;
 static int playerScore = 0;
-// static int hiScore = 0;
+//  static int hiScore = 0;
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Program main entry point of game
@@ -46,7 +47,6 @@ int main()
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "Naughty List"); // Initialization of the main game window
     InitAudioDevice();
-
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Load Fonts
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,12 +98,12 @@ int main()
         xPSourceRect[i].height = xmasPresent[i].height;
         xPSourceRect[i].width = xmasPresent[i].width;
 
-        xPDestRect[i].height = xmasPresent[i].height * xpScale; // set presents scale
-        xPDestRect[i].width = xmasPresent[i].width * xpScale;   // set presents scale
         xPDestRect[i].x = 0;
         xPDestRect[i].y = 0;
+        xPDestRect[i].height = xmasPresent[i].height * xpScale; // set presents scale
+        xPDestRect[i].width = xmasPresent[i].width * xpScale;   // set presents scale
 
-        std::cout << "testing value of i - for i < 2, i should return twice\n"; // debugging test expression
+        std::cout << "testing value of i - for i < 2, i should return twice\n"; // debug test expression
     }
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,8 +168,15 @@ int main()
     float const jumpSpeedDown = 500.f;
     float scrollSpeed = 700.f;
 
+    // int delay = 0;
+
+    bool known[2];
+    known[0] = false;
+    known[1] = false;
+
     JumpDirection jumpdirection;
     Rectangle tmpRect;
+    Rectangle tmpRect2;
 
     Rectangle idle_DestRec = {screenWidth / 2.f, screenHeight / 2.f, idle_FrameWidth, idle_FrameHeight};
     Rectangle run_DestRec = {screenWidth / 2.f, screenHeight / 2.f, run_FrameWidth, run_FrameHeight};
@@ -340,7 +347,6 @@ int main()
         if (!gameOver)
         {
             if (!pause)
-
             {
                 for (int i = 0; i < 2; i++)
                 {
@@ -371,12 +377,22 @@ int main()
                         std::cout << "Game Over\n";
                     }
 
-                    else if ((santa_JumpCentre.x > xPDestRect[i].x) && !gameOver)
+                    if (animations == Jump)
                     {
-                        playerScore += 1;
-
-                        // if (playerScore > hiScore)
-                        //  hiScore = playerScore;
+                        tmpRect2 = jump_DestRec;
+                        tmpRect2.width *= 0.2f;
+                        tmpRect2.height = ground - jump_DestRec.y + jump_DestRec.height / 2; // create a temporary rectangle (as jump height changes in relation to ground, the temp rect adjusts its height from ground)
+                        if (CheckCollisionCircleRec(Vector2{xPDestRect[i].x + xPDestRect[i].width / 2, xPDestRect[i].y + xPDestRect[i].height / 2}, xPDestRect[i].width / 2,
+                                                    Rectangle{tmpRect2.x, tmpRect2.y, tmpRect2.width, tmpRect2.height}))
+                        {
+                            if (!known[i])
+                            {
+                                known[i] = true;
+                                playerScore += 100;
+                            }
+                        }
+                        else
+                            known[i] = false;
                     }
                 }
             }
@@ -522,6 +538,7 @@ int main()
         {
             DrawTexture(score, 160 - score.width / 2, 120 - score.height / 2, RAYWHITE);
             DrawText(TextFormat("%4i", playerScore), 127, 130, 30, DARKBLUE);
+            // DrawRectangle(tmpRect2.x, tmpRect2.y, tmpRect2.width, tmpRect2.height, RED); //Debug collision rectangle for jumping over presents (score points on collision)
         }
 
         if (gameOver)
