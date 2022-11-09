@@ -73,7 +73,7 @@ void initPresents(int i) // initialise variable initPresents with a parameter ex
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Program main entry point of game
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-int main()
+int main() // main entry point of the game
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);                     // set configuration flags at main entry point of game, in this case, multi sample anti aliasing is increased 4 times
     InitWindow(screenWidth, screenHeight, "Naughty List"); // Initialization of the main game window
@@ -91,7 +91,7 @@ int main()
     Music menu_voice = LoadMusicStream("resources/audio/SANTA_CLAUS-You're_on_the_naughty_list.mp3");
     Music footsteps_sound = LoadMusicStream("resources/audio/effects/snow_footsteps.wav");
     Music xmas_ambience = LoadMusicStream("resources/audio/ChristmasAmbienceSoundEffects.wav");
-
+    // set music volumes
     SetMusicVolume(menu_voice, 0.3f);
     SetMusicVolume(main_sound, 0.1f);
     SetMusicVolume(footsteps_sound, 0.8f);
@@ -105,6 +105,7 @@ int main()
     Sound die_sound = LoadSound("resources/audio/effects/death_soundeffect.wav");
     Sound points = LoadSound("resources/audio/effects/points.wav");
 
+    // set sound volumes
     SetSoundVolume(die_sound, 0.1f);
     SetSoundVolume(fall_sound, 0.3f);
     SetSoundVolume(points, 0.4f);
@@ -190,7 +191,7 @@ int main()
     float jump_FrameWidth = (float)(santa_Jump.width / numFramesJump); // cast all to a float as that is what is expected from the variable. We divide the width of the texture by the number of frames on that spritesheet to get 1 individual sprite from the sheet
     float dead_FrameWidth = (float)(santa_Dead.width / numFramesDead); // cast all to a float as that is what is expected from the variable. We divide the width of the texture by the number of frames on that spritesheet to get 1 individual sprite from the sheet
 
-    // as there is only 1 row on each spritesheet, to get the height of each individual sprite, we can use the original texture height and do not need to divide by the number in the column. This applies to all spritesheets. We could use the parameter for height without actually creating a variable but to keep everything clean and similar to the width, we created a similar type. Additionally, this prevents hardcoding values later in other sections of the code, we can just make an adjustment to this line to affect every other line it is used on
+    // as there is only 1 row on each spritesheet, to get the height of each individual sprite, we can use the original texture height and do not need to divide by the number of columns. This applies to all spritesheets. We could use the parameter for height without actually creating a variable but to keep everything clean and similar to the width, we created a similar type. Additionally, this prevents hardcoding values later in other sections of the code, we can just make an adjustment to this line to affect every other line it is used on
     float idle_FrameHeight = santa_Idle.height;
     float run_FrameHeight = santa_Run.height;
     float jump_FrameHeight = santa_Jump.height;
@@ -237,7 +238,7 @@ int main()
     objectRectDead.width = dead_FrameWidth;
     objectRectDead.height = dead_FrameHeight;
 
-    // position vectors for the centre of each sprite of each animation
+    // position vectors for the centre of each sprite for each animation
     Vector2 santa_IdleCentre = {(idle_FrameWidth / 2), (idle_FrameHeight / 2)};
     Vector2 santa_RunCentre = {(run_FrameWidth / 2), (run_FrameHeight / 2)};
     Vector2 santa_JumpCentre = {(jump_FrameWidth / 2), (jump_FrameHeight / 2)};
@@ -569,38 +570,39 @@ int main()
         if (!gameOver) // if the game is not over
         {
             if (!pause) // if the game is not paused
+            // Draw both Xmas presents on screen and change between each type continuously (2 present types - red and blue)
             {
                 for (int i = 0; i < 2; i++)
                     DrawTexturePro(xmasPresent[i], xPSourceRect[i], xPDestRect[i], Vector2Zero(), 0, WHITE);
             }
         }
 
-        if (!gameOver && !pause)
+        if (!gameOver && !pause) // if the game is not over and is not paused
         {
-            DrawTexture(score, 160 - score.width / 2, 120 - score.height / 2, RAYWHITE);
-            DrawText(TextFormat("%4i", playerScore), 127, 130, 30, DARKBLUE);
+            DrawTexture(score, 160 - score.width / 2, 120 - score.height / 2, RAYWHITE); // draw the scoreboard texture to the top left of screen
+            DrawText(TextFormat("%4i", playerScore), 127, 130, 30, DARKBLUE);            // draw the score within the scorboard texture
             // DrawRectangle(tmpRect2.x, tmpRect2.y, tmpRect2.width, tmpRect2.height, RED); //Debug collision rectangle for jumping over presents (score points on collision)
         }
 
-        if (gameOver)
+        if (gameOver) // if the game is over
         {
-            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 40, 5, RED);
+            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 40, 5, RED); // draw text on screen "You Died! Press [ENTER] to Try Again"
         }
 
-        if (pause && !gameOver && !bg_SourceRec.x == 0)
+        if (pause && !gameOver && !bg_SourceRec.x == 0) // if game is paused and not over and the background is not at the intial starting position = 0 (starts at 0 but changes as it begins to scroll)
         {
-            DrawTextEx(SnowforSanta, msg5, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta3 / (float)2), screenHeight - screenHeight / 2}, 40, 5, DARKGREEN);
-
+            DrawTextEx(SnowforSanta, msg5, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta3 / (float)2), screenHeight - screenHeight / 2}, 40, 5, DARKGREEN); // draw text "Press [P] or [ENTER] to Continue"
+            // only draw blinking "Game Paused" text in centre of screen when the game is paused
             if ((blinkFrames / 30) % 3)
             {
                 DrawTextEx(SnowforSanta, msg4, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta2 / (float)2), screenHeight - screenHeight / 2 - 100}, 46, 5, ColorFromHSV(0, 100, 53));
             }
         }
 
-        if (pause && bg_SourceRec.x == 0 && !gameOver)
+        if (pause && !gameOver && bg_SourceRec.x == 0) // if game is paused and not over and the background texture is at the initial starting position = 0
         {
-            DrawTexture(pressEnterToPlay, screenWidth / 2 - pressEnterToPlay.width / 2, screenHeight / 2 - pressEnterToPlay.height / 2 + 30, WHITE);
-            animations = Hide;
+            DrawTexture(pressEnterToPlay, screenWidth / 2 - pressEnterToPlay.width / 2, screenHeight / 2 - pressEnterToPlay.height / 2 + 30, WHITE); // draw "press enter to play" texture on screen
+            animations = Hide;                                                                                                                       // Hide the character sprite
         }
 
         // Testing a timer function to display text at a specific interval
@@ -615,30 +617,30 @@ int main()
         // DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, RED);
         // DrawLine(0, screenHeight / 2, screenWidth, screenHeight / 2, YELLOW);
 
-        switch (animations)
+        switch (animations) // dependent on the switch logic, all animation states will be drawn individially per that logic
         {
-        case Animations::Idle:
-            DrawTexturePro(santa_Idle, objectRectIdle, idle_DestRec, santa_IdleCentre, 0, WHITE);
-            break; // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
+        case Animations::Idle:                                                                    // Idle animation state
+            DrawTexturePro(santa_Idle, objectRectIdle, idle_DestRec, santa_IdleCentre, 0, WHITE); // draw the Idle animation texture on screen
+            break;                                                                                // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
 
-        case Animations::Run:
-            DrawTexturePro(santa_Run, objectRectRun, run_DestRec, santa_RunCentre, 0, WHITE);
-            break; // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
+        case Animations::Run:                                                                 // Run animation state
+            DrawTexturePro(santa_Run, objectRectRun, run_DestRec, santa_RunCentre, 0, WHITE); // draw the Run animation texture on screen
+            break;                                                                            // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
 
-        case Animations::Jump:
-            DrawTexturePro(santa_Jump, objectRectJump, jump_DestRec, santa_JumpCentre, 0, WHITE);
-            break; // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
+        case Animations::Jump:                                                                    // Jump animation state
+            DrawTexturePro(santa_Jump, objectRectJump, jump_DestRec, santa_JumpCentre, 0, WHITE); // draw the Jump animation texture on screen
+            break;                                                                                // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
 
-        case Animations::Dead:
-            DrawTexturePro(santa_Dead, objectRectDead, dead_DestRec, santa_DeadCentre, 0, WHITE);
-            break; // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
+        case Animations::Dead:                                                                    // Dead animation state
+            DrawTexturePro(santa_Dead, objectRectDead, dead_DestRec, santa_DeadCentre, 0, WHITE); // draw the Dead animation texture on screen
+            break;                                                                                // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
 
-        case Animations::Hide:
-            break; // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
+        case Animations::Hide: // Hide animation state
+            break;             // break statement - ensures this particular animation state is stopped before moving to another state within the switch statement (state machine)
         }
 
-        DrawTextEx(SnowforSanta, msg1, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight + 20}, 50, 15, GetColor(0x052c46ff));
-        DrawTextEx(coolvetica_rg, msg2, (Vector2){screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 70}, 22, 2, WHITE);
+        DrawTextEx(SnowforSanta, msg1, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta / (float)2), screenHeight - screenHeight + 20}, 50, 15, GetColor(0x052c46ff)); // Draw text on top centre of screen "Naughty List"
+        DrawTextEx(coolvetica_rg, msg2, (Vector2){screenWidth / (float)2 - (textWidth_coolvetica_rg / (float)2), screenHeight - screenHeight + 70}, 22, 2, WHITE);               // Draw text on top centre of screen below msg1 "by Rob N"
 
         EndDrawing(); // end drawing on canvas
     }
@@ -674,5 +676,5 @@ int main()
 
     //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-    return 0;
+    return 0; // program exit and terminates
 }
