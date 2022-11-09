@@ -8,11 +8,11 @@
 
 ![1](https://user-images.githubusercontent.com/43251151/200733228-52d1b54b-1a05-498e-a7e4-001f6e2cf580.PNG)<br>
 
-## Brief Overview: 
+## Brief Overview:
 
 Platform Game - Endless Runner.
 
-The user plays as an alternative version of Santa i.e. "Bad Santa". 
+The user plays as an alternative version of Santa i.e. "Bad Santa".
 
 The player must gain as much points as possible before colliding with a present and dies.<br>
 
