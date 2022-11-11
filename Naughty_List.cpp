@@ -555,16 +555,18 @@ int main() // main entry point of the game
         // constant characters - each has its own unique string of text
         const char *msg1 = {"Naughty List"};
         const char *msg2 = {"by Rob N"};
-        const char *msg3 = {"You Died! Press [ENTER] to Try Again"};
+        const char *msg3 = {"Game Over!"};
         const char *msg4 = {"Game Paused"};
         const char *msg5 = {"Press [P] or [ENTER] to Continue"};
+        const char *msg6 = {"Press [ENTER] to Try Again"};
 
         // measure the width of each string from the const char msg above
         const int textWidth_SnowforSanta = MeasureTextEx(SnowforSanta, msg1, 50, 15).x;  //(font type, message, font size, font spacing)
         const int textWidth_coolvetica_rg = MeasureTextEx(coolvetica_rg, msg2, 22, 2).x; //(font type, message, font size, font spacing)
-        const int textWidth_SnowforSanta1 = MeasureTextEx(SnowforSanta, msg3, 40, 5).x;  //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta1 = MeasureTextEx(SnowforSanta, msg3, 50, 5).x;  //(font type, message, font size, font spacing)
         const int textWidth_SnowforSanta2 = MeasureTextEx(SnowforSanta, msg4, 46, 5).x;  //(font type, message, font size, font spacing)
         const int textWidth_SnowforSanta3 = MeasureTextEx(SnowforSanta, msg5, 40, 5).x;  //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta4 = MeasureTextEx(SnowforSanta, msg6, 40, 5).x;  //(font type, message, font size, font spacing)
 
         // Draw Xmas presents
         if (!gameOver) // if the game is not over
@@ -586,7 +588,8 @@ int main() // main entry point of the game
 
         if (gameOver) // if the game is over
         {
-            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), screenHeight - screenHeight / 2}, 40, 5, RED); // draw text on screen "You Died! Press [ENTER] to Try Again"
+            DrawTextEx(SnowforSanta, msg3, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta1 / (float)2), (screenHeight - screenHeight / 2) - 100}, 50, 5, RED); // draw text in Red on screen "Game Over!"
+            DrawTextEx(SnowforSanta, msg6, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta4 / (float)2), screenHeight - screenHeight / 2}, 40, 5, DARKGREEN);   // draw text in Green on screen "Press [ENTER] to Try Again"
         }
 
         if (pause && !gameOver && !bg_SourceRec.x == 0) // if game is paused and not over and the background is not at the intial starting position = 0 (starts at 0 but changes as it begins to scroll)
