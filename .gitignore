@@ -2,4 +2,4 @@
 *.dll
 .vscode/
 main.code-workspace
-c_cpp_properties.exe
+*c_cpp_properties.exe
