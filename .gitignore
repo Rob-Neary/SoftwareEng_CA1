@@ -3,4 +3,3 @@
 .vscode/
 main.code-workspace
 *.exe
-!Naughty_List.exe
