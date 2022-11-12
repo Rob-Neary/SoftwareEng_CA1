@@ -594,7 +594,7 @@ int main() // main entry point of the game
             {
                 DrawTextEx(SnowforSanta, msg7, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta5 / (float)2), screenHeight - screenHeight / 2 - 200}, 25, 5, DARKGREEN);
             }
-            // DrawRectangle(tmpRect2.x, tmpRect2.y, tmpRect2.width, tmpRect2.height, RED); //Debug collision rectangle for jumping over presents (score points on collision)
+            // DrawRectangle(tmpRect2.x, tmpRect2.y, tmpRect2.width, tmpRect2.height, RED); // Debug collision rectangle for jumping over presents (score points on collision)
         }
 
         if (gameOver) // if the game is over
