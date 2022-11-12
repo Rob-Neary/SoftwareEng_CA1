@@ -114,6 +114,7 @@ int main() // main entry point of the game
     // Booleans
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
     bool pause = true; // initialise pause variable to True. This is a boolean expression
+    bool jumpInstruction = false;
 
     Texture2D xmasPresent[2]{};  // Create an array for both presents, there are 2 different types of present;
     Rectangle xPSourceRect[2]{}; // Create an array for both present rectangles, this aligns with the 2 presents;
@@ -332,7 +333,10 @@ int main() // main entry point of the game
             {
                 if (!pause) // if the game is not paused execute the following condition (all prior if statements of (IsKeyPressed(KEY_SPACE) must be met for this to be executed)
                 {
-
+                    if (jumpInstruction)
+                    {
+                        jumpInstruction = false;
+                    }
                     if (animations != Jump) // if the animation is not Jumping i.e. running. execute the following (prior conditions must be met for this to be executed)
                     {
                         animations = Jump;                // set animation to Jump
@@ -344,10 +348,11 @@ int main() // main entry point of the game
             }
         }
 
-        if (IsKeyPressed(KEY_ENTER)) // if the Enter key is presssed execute the following
+        if (IsKeyPressed(KEY_ENTER) && pause) // if the Enter key is presssed execute the following
         {
             if (retry) // if retry is true (previous condition must be met) execute the following
             {
+                jumpInstruction = true;
                 for (int i = 0; i < 2; i++) // utilising the presents array, initialise variable i to 0 (initialised only once); boolean(test) expression, if i is less than 2 execute code within for loop {}; increment i by 1 and re-execute test expression until condition is met
                 // the below is described on line 55 to 66
                 {
@@ -559,6 +564,7 @@ int main() // main entry point of the game
         const char *msg4 = {"Game Paused"};
         const char *msg5 = {"Press [P] or [ENTER] to Continue"};
         const char *msg6 = {"Press [ENTER] to Try Again"};
+        const char *msg7 = {"Press [SPACEBAR] to Jump"};
 
         // measure the width of each string from the const char msg above
         const int textWidth_SnowforSanta = MeasureTextEx(SnowforSanta, msg1, 50, 15).x;  //(font type, message, font size, font spacing)
@@ -567,6 +573,7 @@ int main() // main entry point of the game
         const int textWidth_SnowforSanta2 = MeasureTextEx(SnowforSanta, msg4, 46, 5).x;  //(font type, message, font size, font spacing)
         const int textWidth_SnowforSanta3 = MeasureTextEx(SnowforSanta, msg5, 40, 5).x;  //(font type, message, font size, font spacing)
         const int textWidth_SnowforSanta4 = MeasureTextEx(SnowforSanta, msg6, 40, 5).x;  //(font type, message, font size, font spacing)
+        const int textWidth_SnowforSanta5 = MeasureTextEx(SnowforSanta, msg7, 25, 5).x;  //(font type, message, font size, font spacing)
 
         // Draw Xmas presents
         if (!gameOver) // if the game is not over
@@ -583,6 +590,10 @@ int main() // main entry point of the game
         {
             DrawTexture(score, 160 - score.width / 2, 120 - score.height / 2, RAYWHITE); // draw the scoreboard texture to the top left of screen
             DrawText(TextFormat("%4i", playerScore), 127, 130, 30, DARKBLUE);            // draw the score within the scorboard texture
+            if (jumpInstruction)
+            {
+                DrawTextEx(SnowforSanta, msg7, (Vector2){screenWidth / (float)2 - (textWidth_SnowforSanta5 / (float)2), screenHeight - screenHeight / 2 - 200}, 25, 5, DARKGREEN);
+            }
             // DrawRectangle(tmpRect2.x, tmpRect2.y, tmpRect2.width, tmpRect2.height, RED); //Debug collision rectangle for jumping over presents (score points on collision)
         }
 
