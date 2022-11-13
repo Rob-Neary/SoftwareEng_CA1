@@ -119,8 +119,8 @@ int main() // main entry point of the game
     Texture2D xmasPresent[2]{};  // Create an array for both presents, there are 2 different types of present;
     Rectangle xPSourceRect[2]{}; // Create an array for both present rectangles, this aligns with the 2 presents;
 
-    xmasPresent[0] = LoadTexture("resources/sprites/xmas_present1.png"); // initialise the 1st present as 0 in the array and import the texture
-    xmasPresent[1] = LoadTexture("resources/sprites/xmas_present2.png"); // initialise the 2nd present as 1 in the array and import the texture
+    xmasPresent[0] = LoadTexture("resources/images/xmas_present1.png"); // initialise the 1st present as 0 in the array and import the texture
+    xmasPresent[1] = LoadTexture("resources/images/xmas_present2.png"); // initialise the 2nd present as 1 in the array and import the texture
 
     float const xpScale = 0.015;       // initialise variable presents scale as 0.015 of the original imported texture scale. const as this scale does not change
     float const maxJumpHeight = 330.f; // initialise variable maxJumpHeight of the character. const as this max jump height does not change
